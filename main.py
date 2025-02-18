@@ -157,7 +157,7 @@ class Thing:
 g = -9.8
 mu_floor = 0.2
 mu_board = 0.1
-yao_speed = 5.5
+yao_speed = 5.8
 
 
 def wrzBouncingBall(camera, score, b_p : Tuple, b_v : Tuple, b_r : float, ball : Thing, backboards : List[Thing]) -> Tuple | Tuple:
@@ -305,10 +305,6 @@ def main():
 
     score = 0
 
-    banner = "MING DYNASTY!!"
-    size = 100
-    width = MeasureText(banner.encode(), size)
-
     #------------------------------------------------------------------------------
     
     while not WindowShouldClose():
@@ -384,8 +380,19 @@ def main():
 
         wrzPrettyText(f"{score:4d}", WIDTH - 100, 0, 50, RED)
 
-        if kill > 0 or score < 0:
-            wrzPrettyText(banner, (WIDTH - width) // 2, (HEIGHT - size) // 2, size, YELLOW, BLACK)
+        if kill > 0 or score < 0 or score > 42000:
+            if score < 0 or kill > 0:
+                banner = "MING DYNASTY!!"
+                color = YELLOW
+            else:
+                banner = "TOTAL O'NEAL\n VICTORY..."
+                color = PURPLE
+
+            size = 100
+            width = MeasureText(banner.encode(), size)
+
+            wrzPrettyText(banner, (WIDTH - width) // 2, (HEIGHT - size) // 2, size, color, BLACK)
+
             if kill == 200:
                 PlaySound(bell)
                 sleep(2)
