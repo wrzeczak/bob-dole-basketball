@@ -88,6 +88,14 @@ def wrzUpdateCamera(camera : Camera3D):
     if IsKeyDown(KEY_D): CameraMoveRight(camera, camera_move_speed())
     if IsKeyDown(KEY_A): CameraMoveRight(camera, -1 * camera_move_speed())
 
+    def inv_sign(n):
+        return n < 0
+    
+    if abs(camera.position.x) > 50:
+        camera.position.x = 49 * inv_sign(camera.position.x)
+    if abs(camera.position.z) > 50:
+        camera.position.z = 49 * inv_sign(camera.position.x)
+
     # if IsKeyDown(KEY_SPACE): CameraMoveUp(camera, camera_move_speed())
     # if IsKeyDown(KEY_LEFT_SHIFT): CameraMoveUp(camera, -1 * camera_move_speed())  
 
@@ -158,7 +166,6 @@ g = -9.8
 mu_floor = 0.2
 mu_board = 0.1
 yao_speed = 5.8
-
 
 def wrzBouncingBall(camera, score, b_p : Tuple, b_v : Tuple, b_r : float, ball : Thing, backboards : List[Thing]) -> Tuple | Tuple:
 
