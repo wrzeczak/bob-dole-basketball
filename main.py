@@ -157,7 +157,7 @@ class Thing:
 g = -9.8
 mu_floor = 0.2
 mu_board = 0.1
-yao_speed = 5
+yao_speed = 5.5
 
 
 def wrzBouncingBall(camera, score, b_p : Tuple, b_v : Tuple, b_r : float, ball : Thing, backboards : List[Thing]) -> Tuple | Tuple:
@@ -192,6 +192,7 @@ def wrzBouncingBall(camera, score, b_p : Tuple, b_v : Tuple, b_r : float, ball :
                 normal = (1, 0, 0)
             
             b_v = Vector3Reflect(b_v, normal)
+            b_v = Vector3Add(b_v, Vector3Negate(normal))
 
             score += 1
         # print(normal_vector.x, normal_vector.y, normal_vector.z)
@@ -233,12 +234,19 @@ def main():
 
     InitAudioDevice()
 
-    WIDTH = GetMonitorWidth(GetCurrentMonitor())
-    HEIGHT = GetMonitorHeight(GetCurrentMonitor())
+    fullscreen = False
+
+    if not fullscreen:
+        WIDTH = GetMonitorWidth(GetCurrentMonitor()) // 2
+        HEIGHT = GetMonitorHeight(GetCurrentMonitor()) // 2
+    else:
+        WIDTH = GetMonitorWidth(GetCurrentMonitor())
+        HEIGHT = GetMonitorHeight(GetCurrentMonitor())
 
     SetWindowSize(WIDTH, HEIGHT)
-    # SetWindowPosition(WIDTH, HEIGHT)
-    ToggleFullscreen()
+    
+    if not fullscreen: SetWindowPosition(WIDTH // 2, HEIGHT // 2)
+    else: ToggleFullscreen()
 
     camera = Camera3D((0, 2, 0), (1, 2, 0), (0, 1, 0), 90, CAMERA_PERSPECTIVE)
 
