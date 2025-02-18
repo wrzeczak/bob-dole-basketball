@@ -4,7 +4,8 @@ from raylib import *
 from pyray import Camera3D, Mesh, Model, Vector2, Vector3, BoundingBox, Texture2D, Color
 # no idea why, but the `raylib` type import stuff just doesn't work?
 from typing import Tuple, List, Any
-from time import sleep
+from time import sleep, time
+from math import floor as _floor
 
 #------------------------------------------------------------------------------
 
@@ -201,9 +202,13 @@ def wrzBouncingBall(camera, score, b_p : Tuple, b_v : Tuple, b_r : float, ball :
             b_v = Vector3Reflect(b_v, normal)
             b_v = Vector3Add(b_v, Vector3Negate(normal))
 
-            score += 1
+            score += 20
         # print(normal_vector.x, normal_vector.y, normal_vector.z)
         # exit()
+    
+    if Vector3Length(b_v) > 1000:
+        b_p = (0, 2, 0)
+        b_v = (0, 1, 0)
     
     return b_p, b_v, score
 
@@ -230,19 +235,9 @@ def wrzMingChase(score, yao : Thing, y_v : Tuple, ball : Thing) -> Tuple | Tuple
 
 #------------------------------------------------------------------------------
 
-def main():
+global fullscreen
 
-    #------------------------------------------------------------------------------
-
-    WIDTH = 20
-    HEIGHT = 20
-    
-    InitWindow(WIDTH, HEIGHT, b"WRZ: 3D Test")
-
-    InitAudioDevice()
-
-    fullscreen = False
-
+def wrzToggleFullscreen(fullscreen):
     if not fullscreen:
         WIDTH = GetMonitorWidth(GetCurrentMonitor()) // 2
         HEIGHT = GetMonitorHeight(GetCurrentMonitor()) // 2
@@ -255,6 +250,29 @@ def main():
     if not fullscreen: SetWindowPosition(WIDTH // 2, HEIGHT // 2)
     else: ToggleFullscreen()
 
+    return not fullscreen
+
+#------------------------------------------------------------------------------
+
+def main():
+
+    #------------------------------------------------------------------------------
+
+    WIDTH = 20
+    HEIGHT = 20
+    
+    InitWindow(WIDTH, HEIGHT, b"WRZ: 3D Test")
+
+    InitAudioDevice()
+
+    SetTargetFPS(120)
+
+    start_time = time()
+
+    fullscreen = wrzToggleFullscreen(False)
+    WIDTH = GetScreenWidth()
+    HEIGHT = GetScreenWidth()
+
     camera = Camera3D((0, 2, 0), (1, 2, 0), (0, 1, 0), 90, CAMERA_PERSPECTIVE)
 
     DisableCursor()
@@ -262,7 +280,7 @@ def main():
     #------------------------------------------------------------------------------
     
     b_p = (0, 4, 0)
-    b_v = (2, 0, 2)
+    b_v = (0, 1, 0)
     b_r = 0.5
 
     y_v = (0, 0, 0)
@@ -312,6 +330,9 @@ def main():
 
     score = 0
 
+    timestamp_font_size = 40
+    max_pps = 0
+
     #------------------------------------------------------------------------------
     
     while not WindowShouldClose():
@@ -343,12 +364,27 @@ def main():
             ball.position, b_v, score = wrzBouncingBall(camera, score, ball.position, b_v, b_r, ball, [west_board, east_board, north_board, south_board])
         else:
             ball.position = Vector3Add(camera.position, Vector3Scale(forward, 4))
+            # if score > 2: score -= 2
         
         if Vector3Distance(yao.position, camera.position) < 1:
             kill = 1
             continue
 
         yao.position, y_v, score = wrzMingChase(score, yao, y_v, ball)
+
+        now = time()
+        time_difference = _floor(now - start_time)
+        points_per_second = score / time_difference if time_difference > 0 else 0.0
+        max_pps = points_per_second if points_per_second > max_pps else max_pps
+        m = time_difference // 60
+        s = time_difference % 60
+        timestamp = f"{int(m):02d}:{int(s):02d}"
+        avg = f"PPS: {points_per_second:.2f} [{max_pps:.2f}]"
+
+        if IsKeyPressed(KEY_M):
+            fullscreen = wrzToggleFullscreen(fullscreen)
+            WIDTH = GetScreenWidth()
+            HEIGHT = GetScreenHeight()
     
         #------------------------------------------------------------------------------
         
@@ -371,21 +407,21 @@ def main():
 
         max_fps = GetFPS() if GetFPS() > max_fps else max_fps
 
-        wrzPrettyText(f"FPS: {GetFPS():04}", 10, 10, 20)
-        wrzPrettyText(f"MAX: {max_fps:04}", 130, 10, 20)
+        if wireframe_mode: wrzPrettyText(f"FPS: {GetFPS():04}", 10, 10, 20)
+        # wrzPrettyText(f"MAX: {max_fps:04}", 130, 10, 20)
 
-        if wireframe_mode: wrzPrettyText("Wireframe Mode", 10, 30, 20, RED)
-
-        # if boom: wrzPrettyText("BOOM!", 10, 50, 30, GREEN)
+        if wireframe_mode: wrzPrettyText("Wireframe Mode", 130, 10, 20, RED)
 
         DrawCircle(int(WIDTH / 2), int(HEIGHT / 2), 4, BLACK)
         DrawCircle(int(WIDTH / 2), int(HEIGHT / 2), 3, WHITE)
 
-        wrzPrettyText(f"CAM: [{camera.position.x:.2f}, {camera.position.y:.2f}, {camera.position.z:.2f}]", 10, HEIGHT - 50, 20, BLACK, RED)
-        # wrzPrettyText(f"FORWARD: [{forward.x:.2f}, {forward.y:.2f}, {forward.z:.2f}]", 10, HEIGHT - 50, 20)
-        wrzPrettyText(f"BALL: [{ball.position.x:.2f}, {ball.position.y:.2f}, {ball.position.z:.2f}]", 10, HEIGHT - 30, 20, BLACK, BLUE)
+        if wireframe_mode: wrzPrettyText(f"CAM: [{camera.position.x:.2f}, {camera.position.y:.2f}, {camera.position.z:.2f}]", 10, HEIGHT - 50, 20, BLACK, RED)
+        if wireframe_mode: wrzPrettyText(f"BALL: [{ball.position.x:.2f}, {ball.position.y:.2f}, {ball.position.z:.2f}]", 10, HEIGHT - 30, 20, BLACK, BLUE)
 
-        wrzPrettyText(f"{score:4d}", WIDTH - 100, 0, 50, RED)
+        wrzPrettyText(f"{score:05d}/42000", WIDTH - 350, 0, 50, RED)
+
+        if wireframe_mode: wrzPrettyText(avg, (WIDTH - MeasureText(avg.encode(), 20)) // 2, HEIGHT - timestamp_font_size - 30, 20, RED)
+        wrzPrettyText(timestamp, (WIDTH - MeasureText(timestamp.encode(), timestamp_font_size)) // 2, HEIGHT - timestamp_font_size - 10, timestamp_font_size, RED)
 
         if kill > 0 or score < 0 or score > 42000:
             if score < 0 or kill > 0:
