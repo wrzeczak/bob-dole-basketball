@@ -109,7 +109,7 @@ def wrzPrettyText(text, x, y, font_size, color = WHITE, background_color = BLACK
 def wrzModel(mesh : Mesh, texture) -> Model:
     model : Model = LoadModelFromMesh(mesh)
     if texture is not None: model.materials[0].maps[MATERIAL_MAP_ALBEDO].texture = texture
-    bb : BoundingBox = GetMeshBoundingBox(mesh)
+    # bb : BoundingBox = GetMeshBoundingBox(mesh)
 
     return model
 
@@ -261,7 +261,7 @@ def main():
     WIDTH = 20
     HEIGHT = 20
     
-    InitWindow(WIDTH, HEIGHT, b"WRZ: 3D Test")
+    InitWindow(WIDTH, HEIGHT, b"WRZ: Bob Dole Basketball [Python Edition]")
 
     InitAudioDevice()
 
@@ -271,7 +271,7 @@ def main():
 
     fullscreen = wrzToggleFullscreen(False)
     WIDTH = GetScreenWidth()
-    HEIGHT = GetScreenWidth()
+    HEIGHT = GetScreenHeight()
 
     camera = Camera3D((0, 2, 0), (1, 2, 0), (0, 1, 0), 90, CAMERA_PERSPECTIVE)
 

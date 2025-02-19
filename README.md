@@ -10,4 +10,6 @@ Pick up the ball with `SPACE`, and dribble with `LEFT SHIFT`. Shoot the ball wit
 
 ## Usage and Installation
 
-Should be able to run with by just installing raylib (`pip install raylib`) and running `py main.py`.
+`Python`: Should be able to run with by just installing raylib (`pip install raylib`) and running `py main.py`.
+
+`C`: I run the Makefile with w64devkit. Only depends on the raylib library.
