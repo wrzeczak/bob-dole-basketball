@@ -44,7 +44,7 @@ typedef struct {
 } Thing;
 
 Thing * wrzInitThing(Mesh mesh, Vector3 position, Vector3 rotation, float angle, Color color, int dimensions, float size[], Texture2D texture);
-void wrzDrawThing(Thing * t);
+void wrzDrawThing(Thing * t, bool wireframe);
 bool wrzGrabBall(Camera3D camera, Thing * ball);
 void wrzBouncingBall(Camera3D camera, Thing * ball, Vector3 * ball_velocity, int * score, int num_backboards, Thing * backboards[]);
 void wrzMingChase(int * score, Thing * yao, Vector3 * yao_velocity, Thing * ball);
@@ -135,6 +135,8 @@ int main(void) {
     int max_frames = 200;
     int frame_count = 0;
 
+    bool wireframe = false;
+
     Sound bell = LoadSound("bell.mp3");
 
     //------------------------------------------------------------------------------
@@ -178,6 +180,8 @@ int main(void) {
 
         wrzMingChase(&score, yao, yao_velocity, ball);
 
+        if(IsKeyPressed(KEY_U)) wireframe = !wireframe;
+
         //------------------------------------------------------------------------------
         
         BeginDrawing();
@@ -187,7 +191,7 @@ int main(void) {
             BeginMode3D(camera);
 
                 for(int i = 0; i < thing_count; i++) {
-                    wrzDrawThing(things[i]);
+                    wrzDrawThing(things[i], wireframe);
                 }
             
             EndMode3D();
@@ -204,7 +208,7 @@ int main(void) {
 
         __endgame:
             if(game_over) {
-                const char * banner = (score > 9995) ? "TOTAL O\'NEAL\nVICTORY..." : "MING DYNASTY!!";
+                const char * banner = "MING DYNASTY!!";
                 int font_size = 100;
                 int width = MeasureText(banner, font_size);
 
@@ -284,8 +288,9 @@ void wrzPrettyText(const char * text, int x, int y, int font_size, Color f_color
     DrawText(text, x, y, font_size, f_color);
 }
 
-void wrzDrawThing(Thing * t) {
-    DrawModelEx(t->model, t->position, t->rotation, t->angle, (Vector3) {1.0, 1.0, 1.0}, t->color);
+void wrzDrawThing(Thing * t, bool wireframe) {
+    if(!wireframe) DrawModelEx(t->model, t->position, t->rotation, t->angle, (Vector3) {1.0, 1.0, 1.0}, t->color);
+    else DrawModelWiresEx(t->model, t->position, t->rotation, t->angle, (Vector3) {1.0, 1.0, 1.0}, t->color);
     if(t->dimensions == 3) {
         DrawBoundingBox(t->bb, t->color);
     }
